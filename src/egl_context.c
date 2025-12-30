@@ -757,9 +757,17 @@ GLFWbool _glfwCreateContextEGL(_GLFWwindow* window,
     }
     else if (_glfw.egl.platform == EGL_PLATFORM_SURFACELESS_MESA)
     {
+#if defined(__APPLE__)
+        // On macOS, surfaceless platform with kopper can create window surfaces
+        // for Metal presentation. Use eglCreateWindowSurface with the native
+        // handle.
+        window->context.egl.surface =
+            eglCreateWindowSurface(_glfw.egl.display, config, native, attribs);
+#else
         // HACK: Use a pbuffer surface as the default framebuffer
         window->context.egl.surface =
             eglCreatePbufferSurface(_glfw.egl.display, config, attribs);
+#endif
     }
     else
     {
